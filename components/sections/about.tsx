@@ -101,7 +101,6 @@ export function About() {
               {/* Gold Border Overlay */}
               <div className="absolute inset-0 border-2 border-gold/30 rounded-2xl" />
             </div>
-            {/* Trust Card */}
           </motion.div>
         </motion.div>
       </div>
