@@ -117,14 +117,14 @@ export function FeaturedProperties() {
               <button
                 onClick={scrollPrev}
                 disabled={!canScrollPrev}
-                className="w-12 h-12 rounded-full border border-gold/50 flex items-center justify-center text-gold hover:bg-gold hover:text-primary-foreground transition-all duration-300 disabled:opacity-50"
+                className="w-12 h-12 rounded-full border border-gold/50 flex items-center justify-center text-gold hover:bg-gold hover:text-black transition-all duration-300 disabled:opacity-50"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={scrollNext}
                 disabled={!canScrollNext}
-                className="w-12 h-12 rounded-full border border-gold/50 flex items-center justify-center text-gold hover:bg-gold hover:text-primary-foreground transition-all duration-300 disabled:opacity-50"
+                className="w-12 h-12 rounded-full border border-gold/50 flex items-center justify-center text-gold hover:bg-gold hover:text-black transition-all duration-300 disabled:opacity-50"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>

@@ -135,7 +135,7 @@ export function GoogleMap() {
                   rel="noopener noreferrer"
                   className="block mt-8"
                 >
-                  <Button className="w-full bg-gold hover:bg-gold-dark text-primary-foreground transition-all duration-300 hover:scale-[1.02]">
+                  <Button className="w-full bg-gold hover:bg-gold-dark text-black transition-all duration-300 hover:scale-[1.02]">
                     Get Directions
                     <ExternalLink className="ml-2 w-4 h-4" />
                   </Button>

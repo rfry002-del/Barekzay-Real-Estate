@@ -115,13 +115,14 @@ export function Header() {
                   border-gold/50 
                   text-foreground
                   hover:bg-gold 
-                  hover:text-black 
+                  hover:text-black
                   hover:border-gold 
                   transition-all
+                  [&:hover>svg]:text-black
                 "
               >
-                <Phone className="h-4 w-4 mr-2" />
-                Call Now
+                <Phone className="h-4 w-4 mr-2 text-current" />
+                <span className="text-current">Call Now</span>
               </Button>
             </Link>
 
@@ -175,15 +176,16 @@ export function Header() {
                 <Link href="tel:+93780005396">
                   <Button
                     variant="outline"
-                    className="w-full border-gold/50 hover:bg-gold hover:text-black"
+                    className="w-full border-gold/50 text-foreground hover:bg-gold hover:text-black [&:hover>svg]:text-black"
                   >
-                    <Phone className="h-4 w-4 mr-2" />
-                    +93 78000 5396
+                    <Phone className="h-4 w-4 mr-2 text-current" />
+                    <span className="text-current">+93 78000 5396</span>
                   </Button>
                 </Link>
 
-                <Link href="#contact">
+                <Link href="#contact" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button className="w-full bg-gold hover:bg-yellow-500 text-black">
+                    <MessageSquare className="h-4 w-4 mr-2" />
                     Get Consultation
                   </Button>
                 </Link>

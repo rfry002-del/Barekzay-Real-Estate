@@ -11,6 +11,8 @@ import {
   Check,
   Shield,
   Send,
+  AlertCircle,
+  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -50,23 +52,136 @@ const contactInfo = [
   {
     icon: Clock,
     label: "Working Hours",
-    value: "Mon–Fri: 9:00am–5:00pm",
+    value: "Mon-Fri: 9:00am-5:00pm",
   },
 ]
+
+interface FormData {
+  name: string
+  phone: string
+  email: string
+  service: string
+  contactMethod: string
+  message: string
+}
+
+interface FormErrors {
+  name?: string
+  phone?: string
+  email?: string
+  service?: string
+  general?: string
+}
 
 export function Contact() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    phone: "",
+    email: "",
+    service: "",
+    contactMethod: "",
+    message: "",
+  })
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {}
+
+    if (!formData.name.trim() || formData.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters"
+    }
+
+    if (!formData.phone.trim() || formData.phone.trim().length < 6) {
+      newErrors.phone = "Please provide a valid phone number"
+    }
+
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Please provide a valid email address"
+    }
+
+    if (!formData.service) {
+      newErrors.service = "Please select a service"
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target
+    setFormData((prev) => ({ ...prev, [id]: value }))
+    // Clear error when user starts typing
+    if (errors[id as keyof FormErrors]) {
+      setErrors((prev) => ({ ...prev, [id]: undefined }))
+    }
+  }
+
+  const handleSelectChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+    if (errors[field as keyof FormErrors]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }))
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Clear previous errors
+    setErrors({})
+    
+    // Validate form
+    if (!validateForm()) {
+      return
+    }
+
     setIsSubmitting(true)
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsSubmitting(false)
-    setIsSubmitted(true)
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        if (result.errors && Array.isArray(result.errors)) {
+          setErrors({ general: result.errors.join(", ") })
+        } else {
+          setErrors({ general: result.error || "Failed to send message. Please try again." })
+        }
+        return
+      }
+
+      // Success
+      setIsSubmitted(true)
+      setFormData({
+        name: "",
+        phone: "",
+        email: "",
+        service: "",
+        contactMethod: "",
+        message: "",
+      })
+    } catch {
+      setErrors({ general: "Network error. Please check your connection and try again." })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const resetForm = () => {
+    setIsSubmitted(false)
+    setErrors({})
   }
 
   return (
@@ -98,7 +213,7 @@ export function Contact() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="font-serif text-3xl md:text-4xl font-bold text-foreground"
             >
-              Let&apos;s Move Forward <span className="gold-text">With Confidence</span>
+              {"Let's Move Forward"} <span className="gold-text">With Confidence</span>
             </motion.h2>
           </div>
 
@@ -110,7 +225,7 @@ export function Contact() {
               transition={{ duration: 0.6, delay: 0.3 }}
             >
               <p className="text-lg text-muted-foreground mb-8">
-                Tell us what you need and we&apos;ll get back to you quickly with professional guidance — no pressure.
+                {"Tell us what you need and we'll get back to you quickly with professional guidance - no pressure."}
               </p>
 
               {/* Trust Points */}
@@ -128,7 +243,7 @@ export function Contact() {
               {/* Response Time */}
               <div className="bg-gold/10 rounded-xl p-4 mb-10 border border-gold/20">
                 <p className="text-sm text-foreground">
-                  <span className="font-semibold text-gold">Quick Response:</span> We typically respond within 30–60 minutes
+                  <span className="font-semibold text-gold">Quick Response:</span> We typically respond within 30-60 minutes
                 </p>
               </div>
 
@@ -171,34 +286,63 @@ export function Contact() {
                     <h3 className="font-serif text-2xl font-bold text-foreground mb-2">
                       Message Sent!
                     </h3>
-                    <p className="text-muted-foreground">
-                      Thank you for reaching out. We&apos;ll get back to you shortly.
+                    <p className="text-muted-foreground mb-6">
+                      {"Thank you for reaching out. We'll get back to you shortly."}
                     </p>
+                    <Button
+                      onClick={resetForm}
+                      variant="outline"
+                      className="border-gold/50 text-foreground hover:bg-gold hover:text-black"
+                    >
+                      Send Another Message
+                    </Button>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* General Error Message */}
+                    {errors.general && (
+                      <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                        <span>{errors.general}</span>
+                      </div>
+                    )}
+
                     {/* Name */}
                     <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
+                      <Label htmlFor="name">Full Name *</Label>
                       <Input
                         id="name"
                         placeholder="Enter your full name"
-                        required
-                        className="bg-background border-border focus:border-gold"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className={`bg-background border-border focus:border-gold ${
+                          errors.name ? "border-destructive" : ""
+                        }`}
+                        disabled={isSubmitting}
                       />
+                      {errors.name && (
+                        <p className="text-destructive text-sm">{errors.name}</p>
+                      )}
                     </div>
 
                     {/* Phone & Email */}
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number</Label>
+                        <Label htmlFor="phone">Phone Number *</Label>
                         <Input
                           id="phone"
                           type="tel"
                           placeholder="+93 XXX XXX XXX"
-                          required
-                          className="bg-background border-border focus:border-gold"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          className={`bg-background border-border focus:border-gold ${
+                            errors.phone ? "border-destructive" : ""
+                          }`}
+                          disabled={isSubmitting}
                         />
+                        {errors.phone && (
+                          <p className="text-destructive text-sm">{errors.phone}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
@@ -206,17 +350,33 @@ export function Contact() {
                           id="email"
                           type="email"
                           placeholder="your@email.com"
-                          className="bg-background border-border focus:border-gold"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className={`bg-background border-border focus:border-gold ${
+                            errors.email ? "border-destructive" : ""
+                          }`}
+                          disabled={isSubmitting}
                         />
+                        {errors.email && (
+                          <p className="text-destructive text-sm">{errors.email}</p>
+                        )}
                       </div>
                     </div>
 
                     {/* Service & Contact Method */}
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Service Needed</Label>
-                        <Select required>
-                          <SelectTrigger className="bg-background border-border focus:border-gold">
+                        <Label>Service Needed *</Label>
+                        <Select
+                          value={formData.service}
+                          onValueChange={(value) => handleSelectChange("service", value)}
+                          disabled={isSubmitting}
+                        >
+                          <SelectTrigger
+                            className={`bg-background border-border focus:border-gold ${
+                              errors.service ? "border-destructive" : ""
+                            }`}
+                          >
                             <SelectValue placeholder="Select service" />
                           </SelectTrigger>
                           <SelectContent>
@@ -229,10 +389,17 @@ export function Contact() {
                             <SelectItem value="other">Other</SelectItem>
                           </SelectContent>
                         </Select>
+                        {errors.service && (
+                          <p className="text-destructive text-sm">{errors.service}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label>Preferred Contact Method</Label>
-                        <Select>
+                        <Select
+                          value={formData.contactMethod}
+                          onValueChange={(value) => handleSelectChange("contactMethod", value)}
+                          disabled={isSubmitting}
+                        >
                           <SelectTrigger className="bg-background border-border focus:border-gold">
                             <SelectValue placeholder="Select method" />
                           </SelectTrigger>
@@ -252,7 +419,10 @@ export function Contact() {
                         id="message"
                         placeholder="Tell us about your real estate needs..."
                         rows={4}
+                        value={formData.message}
+                        onChange={handleInputChange}
                         className="bg-background border-border focus:border-gold resize-none"
+                        disabled={isSubmitting}
                       />
                     </div>
 
@@ -260,10 +430,13 @@ export function Contact() {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-gold hover:bg-gold-dark text-primary-foreground py-6 text-lg transition-all duration-300 hover:scale-[1.02]"
+                      className="w-full bg-gold hover:bg-gold-dark text-black py-6 text-lg transition-all duration-300 hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
                       {isSubmitting ? (
-                        "Sending..."
+                        <>
+                          <Loader2 className="mr-2 w-5 h-5 animate-spin" />
+                          Sending...
+                        </>
                       ) : (
                         <>
                           Submit Message

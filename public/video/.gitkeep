@@ -1,0 +1,5 @@
+# Place your video file here as "1.mp4"
+# The video will automatically play with sound when clicked in the video section.
+# 
+# Supported formats: MP4 (recommended), WebM, OGG
+# Recommended: MP4 with H.264 codec for best cross-browser compatibility

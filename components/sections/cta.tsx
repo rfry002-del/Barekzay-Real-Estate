@@ -53,7 +53,7 @@ export function CTA() {
             <Link href="#contact">
               <Button
                 size="lg"
-                className="bg-gold hover:bg-gold-dark text-primary-foreground text-lg px-10 py-6 transition-all duration-300 hover:scale-105"
+                className="bg-gold hover:bg-gold-dark text-black text-lg px-10 py-6 transition-all duration-300 hover:scale-105"
               >
                 Contact Us Today
                 <ArrowRight className="ml-2 w-5 h-5" />

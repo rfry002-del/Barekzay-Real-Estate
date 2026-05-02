@@ -1,14 +1,65 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useInView } from "framer-motion"
-import { useRef, useState } from "react"
-import { Play, X } from "lucide-react"
+import { useRef, useState, useEffect } from "react"
+import { Play, X, Volume2, VolumeX } from "lucide-react"
 
 export function VideoSection() {
   const ref = useRef(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
+  const [hasVideo, setHasVideo] = useState(false)
+
+  // Check if video file exists
+  useEffect(() => {
+    // Try to fetch video to check if it exists
+    fetch('/video/1.mp4', { method: 'HEAD' })
+      .then(response => {
+        if (response.ok) {
+          setHasVideo(true)
+        }
+      })
+      .catch(() => {
+        setHasVideo(false)
+      })
+  }, [])
+
+  const handlePlay = () => {
+    setIsPlaying(true)
+  }
+
+  const handleClose = () => {
+    setIsPlaying(false)
+    if (videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
+    }
+  }
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted
+      setIsMuted(!isMuted)
+    }
+  }
+
+  // Auto-play video when modal opens
+  useEffect(() => {
+    if (isPlaying && videoRef.current && hasVideo) {
+      videoRef.current.play().catch(() => {
+        // If autoplay fails, try muted autoplay
+        if (videoRef.current) {
+          videoRef.current.muted = true
+          setIsMuted(true)
+          videoRef.current.play()
+        }
+      })
+    }
+  }, [isPlaying, hasVideo])
 
   return (
     <section className="py-24 bg-secondary/30">
@@ -45,7 +96,7 @@ export function VideoSection() {
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative aspect-video rounded-2xl overflow-hidden group cursor-pointer"
-            onClick={() => setIsPlaying(true)}
+            onClick={handlePlay}
           >
             {/* Video Thumbnail */}
             <div
@@ -67,9 +118,16 @@ export function VideoSection() {
                 whileTap={{ scale: 0.95 }}
                 className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gold/90 flex items-center justify-center shadow-2xl group-hover:bg-gold transition-all duration-300"
               >
-                <Play className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground ml-1" fill="currentColor" />
+                <Play className="w-8 h-8 md:w-10 md:h-10 text-black ml-1" fill="currentColor" />
               </motion.div>
             </div>
+
+            {/* Video Status Badge */}
+            {!hasVideo && (
+              <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                Video coming soon
+              </div>
+            )}
 
             {/* Corner Accents */}
             <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-gold/50" />
@@ -91,35 +149,69 @@ export function VideoSection() {
       </div>
 
       {/* Video Modal */}
-{isPlaying && (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
-    onClick={() => setIsPlaying(false)}
-  >
-    <button
-      onClick={() => setIsPlaying(false)}
-      className="absolute top-6 right-6 text-white hover:text-gold transition"
-    >
-      <X className="w-8 h-8" />
-    </button>
+      <AnimatePresence>
+        {isPlaying && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+            onClick={handleClose}
+          >
+            {/* Close Button */}
+            <button
+              onClick={handleClose}
+              className="absolute top-6 right-6 text-white hover:text-gold transition z-10"
+              aria-label="Close video"
+            >
+              <X className="w-8 h-8" />
+            </button>
 
-    <div
-      className="relative w-full max-w-5xl aspect-video rounded-xl overflow-hidden shadow-2xl"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <iframe
-        className="w-full h-full"
-        src="video/1.mp4"
-        title="Video"
-        allow="autoplay; encrypted-media"
-        allowFullScreen
-      />
-    </div>
-  </motion.div>
-)}
+            {/* Video Container */}
+            <div
+              className="relative w-full max-w-5xl aspect-video rounded-xl overflow-hidden shadow-2xl bg-black"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {hasVideo ? (
+                <>
+                  <video
+                    ref={videoRef}
+                    className="w-full h-full object-contain"
+                    src="/video/1.mp4"
+                    controls
+                    playsInline
+                    preload="metadata"
+                  >
+                    <track kind="captions" srcLang="en" label="English" />
+                    Your browser does not support the video tag.
+                  </video>
+                  
+                  {/* Mute/Unmute Toggle */}
+                  <button
+                    onClick={toggleMute}
+                    className="absolute bottom-20 right-4 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full transition"
+                    aria-label={isMuted ? "Unmute" : "Mute"}
+                  >
+                    {isMuted ? (
+                      <VolumeX className="w-5 h-5" />
+                    ) : (
+                      <Volume2 className="w-5 h-5" />
+                    )}
+                  </button>
+                </>
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-white">
+                  <Play className="w-16 h-16 text-gold mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Video Coming Soon</h3>
+                  <p className="text-gray-400 text-center max-w-md px-4">
+                    Place your video file at <code className="bg-white/10 px-2 py-1 rounded">/public/video/1.mp4</code> and it will automatically play with sound.
+                  </p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   )
 }
