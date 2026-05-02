@@ -92,7 +92,7 @@ export function About() {
             {/* Main Image */}
             <div className="relative rounded-2xl overflow-hidden">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Advertisement-vA3DmCaYuZXMbfMKNMzaJEE2Jx0KIy.png"
+                src="images/2.png"
                 alt="Barekzay Real Estate Professional"
                 width={600}
                 height={700}

@@ -27,7 +27,7 @@ export function Hero() {
         className="absolute inset-0"
       >
         <Image
-          src="/images/hero-luxury-home.jpg"
+          src="/images/hero-luxury-home.png"
           alt="Luxury home"
           fill
           priority

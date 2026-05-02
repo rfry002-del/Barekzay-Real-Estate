@@ -27,21 +27,18 @@ export function Header() {
 
   useEffect(() => {
     setMounted(true)
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
+    const handleScroll = () => setIsScrolled(window.scrollY > 50)
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   return (
-<header
-  className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-    isScrolled
-      ? "bg-background/90 backdrop-blur-xl shadow-lg border-b border-gold/20"
-      : "bg-background/60 backdrop-blur-md"
-  }`}
->
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
+          ? "bg-background/90 backdrop-blur-xl shadow-lg border-b border-gold/20"
+          : "bg-background/60 backdrop-blur-md"
+        }`}
+    >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
 
@@ -53,10 +50,9 @@ export function Header() {
               width={60}
               height={60}
               className="rounded-full"
+              loading="eager"
             />
-
             <div className="hidden sm:block">
-              {/* FIXED TEXT */}
               <p className="font-serif text-lg font-bold text-foreground">
                 BAREKZAY
               </p>
@@ -72,13 +68,7 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="
-                  text-sm font-medium 
-                  text-foreground/80 
-                  hover:text-gold 
-                  transition 
-                  relative group
-                "
+                className="text-sm font-medium text-foreground/80 hover:text-gold transition relative group"
               >
                 {link.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gold transition-all duration-300 group-hover:w-full" />
@@ -89,41 +79,45 @@ export function Header() {
           {/* ACTIONS */}
           <div className="flex items-center gap-3">
 
-            {/* ✅ FIXED TOGGLE */}
+            {/* THEME TOGGLE */}
             {mounted && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="
-                  relative
-                  text-foreground
-                  hover:bg-muted
-                  transition
-                "
+                className="text-foreground hover:bg-muted transition"
               >
                 <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                 <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               </Button>
             )}
 
-            {/* CALL */}
-            <Link href="tel:+93780005396" className="hidden md:block">
-              <Button
-                variant="outline"
-                className="
-                  border-gold/50 
-                  text-foreground
-                  hover:bg-gold 
-                  hover:text-black 
-                  hover:border-gold 
-                  transition-all
-                "
-              >
-                <Phone className="h-4 w-4 mr-2" />
+            {/* ✅ FIXED CALL BUTTON (NO NESTED <a>) */}
+            <Button
+              asChild
+              variant="outline"
+              className="
+    hidden md:flex items-center gap-2
+
+    border-gold/50 
+    text-foreground
+
+    hover:bg-gold
+    hover:border-gold
+
+  hover:text-white
+dark:hover:text-white
+
+    [&_svg]:text-current
+
+    transition-all duration-300
+  "
+            >
+              <a href="tel:+93780005396">
+                <Phone className="h-4 w-4" />
                 Call Now
-              </Button>
-            </Link>
+              </a>
+            </Button>
 
             {/* CTA */}
             <Link href="#contact" className="hidden md:block">
@@ -133,18 +127,14 @@ export function Header() {
               </Button>
             </Link>
 
-            {/* MOBILE MENU */}
+            {/* MOBILE MENU BUTTON */}
             <Button
               variant="ghost"
               size="icon"
               className="lg:hidden text-foreground"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              {isMobileMenuOpen ? <X /> : <Menu />}
             </Button>
           </div>
         </div>
@@ -172,7 +162,8 @@ export function Header() {
               ))}
 
               <div className="flex flex-col gap-3 mt-4">
-                <Link href="tel:+93780005396">
+                {/* ✅ FIXED MOBILE CALL */}
+                <a href="tel:+93780005396">
                   <Button
                     variant="outline"
                     className="w-full border-gold/50 hover:bg-gold hover:text-black"
@@ -180,7 +171,7 @@ export function Header() {
                     <Phone className="h-4 w-4 mr-2" />
                     +93 78000 5396
                   </Button>
-                </Link>
+                </a>
 
                 <Link href="#contact">
                   <Button className="w-full bg-gold hover:bg-yellow-500 text-black">

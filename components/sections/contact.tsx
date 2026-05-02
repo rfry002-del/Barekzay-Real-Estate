@@ -60,13 +60,40 @@ export function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+
+    const form = e.currentTarget
+
+    const formData = {
+      name: (form.name as any).value,
+      email: (form.email as any).value,
+      phone: (form.phone as any).value,
+      message: (form.message as any).value,
+    }
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        setIsSubmitted(true)
+      } else {
+        alert("Something went wrong")
+      }
+    } catch (error) {
+      alert("Error sending message")
+    }
+
     setIsSubmitting(false)
-    setIsSubmitted(true)
   }
 
   return (
