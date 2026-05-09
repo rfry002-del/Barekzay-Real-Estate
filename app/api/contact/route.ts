@@ -3,16 +3,16 @@ import { Resend } from "resend"
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(req: Request) {
-    try {
-        const body = await req.json()
+  try {
+    const body = await req.json()
 
-        const { name, email, phone, message } = body
+    const { name, email, phone, message } = body
 
-        const data = await resend.emails.send({
-            from: "Barekzay <onboarding@resend.dev>",
-            to: ["barekzayrealestate@gmail.com"],
-            subject: "New Contact Form Submission",
-            html: `
+    const data = await resend.emails.send({
+      from: "Barekzay <abarekzay@arsalansolutions.com>",
+      to: ["barekzayrealestate@gmail.com"],
+      subject: "New Contact Form Submission",
+      html: `
   <div style="font-family: Arial, sans-serif; background:#f5f5f5; padding:20px;">
     
     <div style="max-width:600px; margin:auto; background:white; border-radius:10px; overflow:hidden; box-shadow:0 5px 20px rgba(0,0,0,0.1);">
@@ -68,10 +68,10 @@ export async function POST(req: Request) {
     </div>
   </div>
 `
-        })
+    })
 
-        return Response.json({ success: true })
-    } catch (error) {
-        return Response.json({ success: false, error })
-    }
+    return Response.json({ success: true })
+  } catch (error) {
+    return Response.json({ success: false, error })
+  }
 }
